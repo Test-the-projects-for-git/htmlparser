@@ -1,4 +1,4 @@
-compile:
+cmple:
 	gcc main.c -lcurl -o main.o
 clean:
-	rm *.html main.o
+	rm *.html main.o result.txt
