@@ -89,13 +89,35 @@ static void wrtfbuff(FILE* fd, char* mem_buffer, uint32_t fsz){
   fread(mem_buffer, sizeof(char), fsz, fd);
 }
 
-/*for find <p></p> and it record in memory buff*/
-static void cpybuffp(char* mem_buffer, char* temp_buffer, uint32_t fsz)
+/*for find <p></p> <h1></h1> and it record in memory buff*/
+static void cpyph(char* mem_buffer, char* temp_buffer, uint32_t fsz)
 {
   int i = 0, j = 0, k = 0;
-  puts("parsing <p></p> tags...\n");
+  puts("parsing html tags...\n");
   while(i < fsz)
   {
+    /*tag <h1></h1>*/
+    if(mem_buffer[i] == '<' && mem_buffer[i + 1] == 'h' && mem_buffer[i + 2] == '1' && mem_buffer[i + 3] == '>')
+    {
+      puts("found entry <h></h1>");
+      i += 4; 
+      j = i;
+      while(mem_buffer[j] != '<' && mem_buffer[j + 1] != '/' && mem_buffer[j + 2] != 'h' && mem_buffer[j + 3] != '1' && mem_buffer[j + 4] != '>')
+      {
+        temp_buffer[k] = mem_buffer[j];
+        k++;
+        j++;
+      }
+
+      if(mem_buffer[j] == '<')
+      {
+        temp_buffer[k] = '\n';
+        k++;
+        j++;
+      }
+    }
+
+    /*skip internal tags how <p><any tag></any tag></p>*/
     if(mem_buffer[i] == '<' && mem_buffer[i + 1] == 'p' && mem_buffer[i + 2] == '>' && mem_buffer[i + 3] == '<')
     {
 	    i += 3;
@@ -105,12 +127,13 @@ static void cpybuffp(char* mem_buffer, char* temp_buffer, uint32_t fsz)
 	    }
     }
 
+    /*tags <p></p>*/
     if(mem_buffer[i] == '<' && mem_buffer[i + 1] == 'p' && mem_buffer[i + 2] == '>')
     {
-     puts("found entry");
+     puts("found entry <p></p>");
      j = i;
      j += 3;
-         
+
      while(mem_buffer[j] != '\0')
      {
        if(mem_buffer[j] == '<' && mem_buffer[j + 1] == '/' && mem_buffer[j + 2] == 'p' && mem_buffer[j + 3] == '>')
@@ -235,7 +258,7 @@ int main(int argc, char** argv)
    
    fclose(fd_index);
    
-   cpybuffp(mem_buffer, temp_buffer, fsz);
+   cpyph(mem_buffer, temp_buffer, fsz);
    printf("%s\n", temp_buffer);
    puts("--------------------------the end--------------------");
    
